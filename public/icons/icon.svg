@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Cartilla Fenológica">
+  <rect width="512" height="512" rx="112" fill="#F3F6F1"/>
+  <g transform="translate(256 262) scale(15.5) translate(-12 -12)">
+    <circle cx="8.5" cy="14" r="5.2" fill="#4B4EA0"/>
+    <circle cx="15.5" cy="14" r="5.2" fill="#8A4F9E"/>
+    <circle cx="12" cy="9.5" r="5.2" fill="#2E7D6B"/>
+    <path d="M12 5.2C12 3 13.4 2 15 2" stroke="#2E7D4F" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

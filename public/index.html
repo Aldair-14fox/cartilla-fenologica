@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4B4EA0">
+<meta name="description" content="Cartilla fenologica de campo para arandano: registro por niveles de ramas, brotes y terminales, con trabajo sin senal y sincronizacion.">
+<title>Cartilla Fenológica de Campo</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cartilla">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <svg class="berry" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="8.5" cy="14" r="5.2" fill="var(--rama)"/>
+        <circle cx="15.5" cy="14" r="5.2" fill="var(--terminal)"/>
+        <circle cx="12" cy="9.5" r="5.2" fill="var(--brote)"/>
+        <path d="M12 5.2C12 3 13.4 2 15 2" stroke="var(--good)" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <div style="min-width:0">
+        <h1>Cartilla Fenológica</h1>
+        <small>Arándano · campo</small>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="savechip" id="savechip"><span class="dot"></span><span id="savetxt">Guardado</span></div>
+    <button class="iconbtn" id="syncBtn" title="Sincronizar" aria-label="Sincronizar" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-8-4.9"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 8 4.9"/><path d="M20 4v4h-4"/><path d="M4 20v-4h4"/></svg>
+    </button>
+    <button class="iconbtn" id="themeBtn" title="Cambiar tema" aria-label="Cambiar tema">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <button class="iconbtn" id="acctBtn" title="Cuenta" aria-label="Cuenta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+    </button>
+  </div>
+  <div class="offline-strip" id="offlineStrip" hidden>Sin conexión · los datos se guardan en el equipo</div>
+</div>
+
+<!-- ====================== PANTALLA 0: ACCESO ====================== -->
+<main id="screen-auth" class="wrap" hidden>
+  <div class="authwrap">
+    <div class="eyebrow">Acceso</div>
+    <h2 class="section" id="auth-title">Entrar a la cartilla</h2>
+    <p class="lead" id="auth-lead">Ingresa con tu usuario para que tus muestras se respalden y puedas verlas desde otro equipo. Sin conexión también puedes trabajar: se sincroniza cuando vuelva la señal.</p>
+
+    <form id="form-auth" class="card pad" autocomplete="on">
+      <label class="field"><span class="lab">Usuario</span>
+        <input id="a-user" name="username" autocapitalize="none" autocomplete="username" required>
+      </label>
+      <label class="field" style="margin-top:12px"><span class="lab">Contraseña</span>
+        <input id="a-pass" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <label class="field" style="margin-top:12px" id="a-nombre-wrap" hidden><span class="lab">Nombre y apellido</span>
+        <input id="a-nombre" name="nombre" autocomplete="name">
+      </label>
+      <label class="field" style="margin-top:12px" id="a-code-wrap" hidden><span class="lab">Código de registro <span class="u">lo entrega el supervisor</span></span>
+        <input id="a-code" name="code" autocapitalize="none">
+      </label>
+
+      <p class="authmsg" id="auth-msg" hidden></p>
+
+      <button type="submit" class="btn primary block" id="auth-submit" style="margin-top:18px">Entrar</button>
+      <button type="button" class="btn ghost block" id="auth-toggle" style="margin-top:10px">Crear una cuenta nueva</button>
+      <button type="button" class="btn ghost block" id="auth-skip" style="margin-top:10px">Trabajar solo en este equipo</button>
+    </form>
+    <p class="note" style="max-width:52ch">Si eliges trabajar solo en este equipo, los datos quedan únicamente en este teléfono. Puedes iniciar sesión después y todo lo capturado se sube.</p>
+  </div>
+</main>
+
+<!-- ====================== PANTALLA 1: REGISTRO DE MUESTRA ====================== -->
+<main id="screen-registro" class="wrap" hidden>
+  <div class="eyebrow">Paso 1 de 2</div>
+  <h2 class="section">Registrar muestra</h2>
+  <p class="lead">Identifica la unidad de evaluación. Al guardar se abre la cartilla por niveles para registrar ramas, brotes y terminales.</p>
+
+  <form id="form-muestra" class="card pad" autocomplete="off">
+    <div class="grid two">
+      <label class="field"><span class="lab">Fundo</span><input id="m-fundo" name="fundo" required></label>
+      <label class="field"><span class="lab">Módulo</span><input id="m-modulo" name="modulo"></label>
+      <label class="field"><span class="lab">Lote</span><input id="m-lote" name="lote"></label>
+      <label class="field"><span class="lab">Válvula</span><input id="m-valvula" name="valvula"></label>
+      <label class="field"><span class="lab">Variedad</span><input id="m-variedad" name="variedad" placeholder="Escribe la variedad"></label>
+      <label class="field"><span class="lab">Evaluador</span><input id="m-evaluador" name="evaluador"></label>
+    </div>
+    <div class="grid two" style="margin-top:12px">
+      <label class="field"><span class="lab">Fecha</span><input id="m-fecha" name="fecha" type="date"></label>
+      <label class="field"><span class="lab">Código / planta <span class="u">(opcional)</span></span><input id="m-codigo" name="codigo" placeholder="p. ej. P-014"></label>
+    </div>
+    <button type="submit" class="btn primary block" style="margin-top:18px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+      Guardar y abrir cartilla
+    </button>
+  </form>
+
+  <div class="saved" id="saved-list"></div>
+</main>
+
+<!-- ====================== PANTALLA 2: FORMULARIO POR NIVELES ====================== -->
+<main id="screen-formulario" class="wrap" hidden>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
+    <button class="iconbtn" id="backBtn" title="Volver a muestras" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="eyebrow" style="flex:1">Paso 2 de 2 · Cartilla</div>
+  </div>
+  <div class="ctx" id="ctx"></div>
+  <div id="tree"></div>
+  <button class="addbtn rama-add" id="add-rama">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    Agregar rama
+  </button>
+</main>
+
+<!-- ====================== BARRA INFERIOR ====================== -->
+<div class="bottombar" id="bottombar" hidden>
+  <div class="bottombar-in">
+    <div class="totals" id="totals"></div>
+    <button class="btn ghost" id="exportBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      Exportar
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- hoja de exportación -->
+<div class="scrim" id="exp-scrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Exportar datos">
+    <header>
+      <h3>Exportar datos</h3>
+      <button class="iconbtn" data-close-exp aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+    <div class="sbody">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <div class="segmented" id="exp-fmt"><button class="on" data-f="csv">CSV</button><button data-f="json">JSON</button></div>
+        <div class="segmented" id="exp-scope"><button class="on" data-s="one">Esta muestra</button><button data-s="all">Todas</button></div>
+      </div>
+      <textarea class="out" id="exp-out" readonly spellcheck="false"></textarea>
+      <div class="exp-actions">
+        <button class="btn primary" id="exp-copy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          Copiar
+        </button>
+        <button class="btn ghost" id="exp-download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          Descargar archivo
+        </button>
+      </div>
+      <p class="note">El CSV sale en <b>formato largo</b>: una fila por terminal, con los datos de la muestra, rama y brote repetidos — listo para Excel, R o Python.</p>
+    </div>
+  </div>
+</div>
+
+<!-- hoja de cuenta -->
+<div class="scrim" id="acct-scrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Cuenta">
+    <header>
+      <h3>Cuenta y sincronización</h3>
+      <button class="iconbtn" data-close-acct aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+    <div class="sbody" id="acct-body"></div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

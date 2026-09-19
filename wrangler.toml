@@ -1,0 +1,21 @@
+name = "cartilla-fenologica"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# Sirve /public como estatico; el Worker solo maneja /api/*
+assets = { directory = "./public", binding = "ASSETS", not_found_handling = "single-page-application" }
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cartilla-fenologica"
+# Pega aqui el id que imprime `wrangler d1 create cartilla-fenologica`.
+# El valor de ceros solo sirve para desarrollo local (`wrangler dev --local`).
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[observability]
+enabled = true
+
+# Secreto requerido en produccion (firma de sesiones):
+#   wrangler secret put SESSION_SECRET
+# Codigo para poder registrar cuentas nuevas (opcional pero recomendado):
+#   wrangler secret put REGISTRATION_CODE

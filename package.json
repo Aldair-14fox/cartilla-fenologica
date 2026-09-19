@@ -1,0 +1,20 @@
+{
+  "name": "cartilla-fenologica",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cartilla fenologica de campo para arandano — PWA offline-first con sincronizacion a Cloudflare D1",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply cartilla-fenologica --local",
+    "db:migrate": "wrangler d1 migrations apply cartilla-fenologica --remote",
+    "db:console": "wrangler d1 execute cartilla-fenologica --remote --command",
+    "tail": "wrangler tail",
+    "test:api": "bash test/api.test.sh",
+    "test:ui": "node test/ui.test.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.42.0"
+  }
+}

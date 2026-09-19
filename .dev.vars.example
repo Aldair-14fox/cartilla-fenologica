@@ -1,0 +1,4 @@
+# Copia a .dev.vars para desarrollo local (no se sube a git).
+# Codigo que se exige para crear cuentas nuevas. Si lo dejas vacio o borras la
+# linea, cualquiera con la URL puede registrarse.
+REGISTRATION_CODE=cambia-esto
