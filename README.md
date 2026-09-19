@@ -49,19 +49,23 @@ Requiere Node 18+ y una cuenta de Cloudflare.
 
 ```bash
 npm install
-npx wrangler login
+npx wrangler login     # abre el navegador
+./deploy.sh            # crea la D1, migra y despliega
+```
 
-# 1. Crear la base de datos y pegar el database_id que imprime en wrangler.toml
-npx wrangler d1 create cartilla-fenologica
+`deploy.sh` es idempotente: si la base ya existe la reutiliza y si el
+`database_id` ya está en `wrangler.toml` no lo vuelve a tocar. Al terminar,
+cierra el registro de cuentas:
 
-# 2. Crear el esquema
-npm run db:migrate        # remoto
-npm run db:migrate:local  # local
-
-# 3. Código para poder crear cuentas (sin esto, cualquiera se registra)
+```bash
 npx wrangler secret put REGISTRATION_CODE
+```
 
-# 4. Desplegar
+Paso a paso, si lo prefieres a mano:
+
+```bash
+npx wrangler d1 create cartilla-fenologica  # pega el id en wrangler.toml
+npm run db:migrate
 npm run deploy
 ```
 
