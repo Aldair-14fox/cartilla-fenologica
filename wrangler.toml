@@ -15,7 +15,6 @@ database_id = "00000000-0000-0000-0000-000000000000"
 [observability]
 enabled = true
 
-# Secreto requerido en produccion (firma de sesiones):
-#   wrangler secret put SESSION_SECRET
-# Codigo para poder registrar cuentas nuevas (opcional pero recomendado):
+# Codigo que se exige para crear cuentas nuevas. Sin el, cualquiera con la URL
+# puede registrarse:
 #   wrangler secret put REGISTRATION_CODE
