@@ -115,7 +115,11 @@
     return Promise.all(writes).then(
       function () {
         setSaveState("saved");
-        scheduleSync();
+        // Solo vale la pena sincronizar si de verdad quedo algo por subir.
+        // El propio sync marca pendingIds para persistir el dirty=0 que acaba
+        // de confirmar el servidor; si eso volviera a disparar un sync, cada
+        // ronda agendaria la siguiente y la app quedaria en bucle.
+        if (dirtyCount()) scheduleSync();
       },
       function () { setSaveState("error"); }
     );
@@ -227,8 +231,12 @@
 
     syncing = true;
     var btn = document.getElementById("syncBtn");
-    if (btn) btn.classList.add("spin");
-    setSaveState("syncing");
+    // El sync de fondo es silencioso: cambiar el texto del chip en cada ronda
+    // hacia parpadear la barra superior. Solo se avisa si el operario lo pidio.
+    if (opts.manual) {
+      if (btn) btn.classList.add("spin");
+      setSaveState("syncing");
+    }
 
     // Snapshot de lo sucio: si el operario sigue escribiendo durante el sync,
     // esas ediciones quedan con updatedAt mayor y se suben en la próxima ronda.
@@ -262,6 +270,7 @@
         });
 
         // Aplica cambios del servidor (otros dispositivos).
+        var cambios = 0;
         (res.samples || []).forEach(function (rs) {
           var local = db.samples.find(function (x) { return x.id === rs.id; });
           if (local && local.dirty && local.updatedAt > rs.updatedAt) return; // lo nuestro es más nuevo
@@ -275,6 +284,7 @@
             db.samples.push(merged);
           }
           pendingIds[merged.id] = true;
+          cambios++;
         });
 
         if (typeof res.now === "number") {
@@ -283,11 +293,28 @@
         }
         if (res.user) { user = res.user; }
 
-        return flushSave();
+        return flushSave().then(function () { return cambios; });
       })
-      .then(function () {
+      .then(function (cambios) {
+        // Redibujar sin cambios reales hace saltar la pantalla y, si el operario
+        // esta escribiendo, le quita el foco del campo a media cifra.
+        if (!cambios) {
+          setSaveState("saved");
+          renderSyncBadges();
+          return;
+        }
+        // Hay novedades de otro equipo, pero si esta escribiendo no le movemos
+        // el árbol bajo los dedos: se redibuja al soltar el campo.
+        var enFoco = document.activeElement;
+        if (enFoco && enFoco.tagName === "INPUT" && enFoco.closest("#tree")) {
+          enFoco.addEventListener("blur", function alRedibujar() {
+            enFoco.removeEventListener("blur", alRedibujar);
+            render();
+          });
+          setSaveState("saved");
+          return;
+        }
         render();
-        setSaveState("saved");
       })
       .catch(function (err) {
         if (err.status === 401) {
@@ -303,7 +330,12 @@
       })
       .then(function () {
         syncing = false;
-        if (btn) btn.classList.remove("spin");
+        // Un sync sin nada que subir termina en decenas de ms: si quitamos la
+        // marca al instante, el operario que pulso el boton no llega a ver nada
+        // y no sabe si hizo algo. La dejamos un momento visible.
+        if (btn && btn.classList.contains("spin")) {
+          setTimeout(function () { btn.classList.remove("spin"); }, 600);
+        }
       });
   }
 
@@ -528,6 +560,21 @@
       '<span class="t">Term. <b>' + t.terminales + "</b></span>" +
       '<span class="t">Flores <b>' + t.flores + "</b></span>" +
       '<span class="t">Cuaje <b>' + cuaje + "</b></span>";
+  }
+
+  // Actualiza solo las etiquetas de respaldo de la lista, sin rehacer el DOM.
+  // Se usa tras un sync sin novedades: refresca el estado visible sin que la
+  // pantalla salte ni se pierda el foco de un campo.
+  function renderSyncBadges() {
+    if (mode !== "cloud") return;
+    db.samples.forEach(function (s) {
+      var row = document.querySelector('.srow [data-open="' + s.id + '"]');
+      var badge = row && row.parentNode.querySelector(".sync");
+      if (!badge) return;
+      badge.className = "sync " + (s.dirty ? "wait" : "up");
+      badge.textContent = s.dirty ? "por subir" : "✓";
+      badge.title = s.dirty ? "Pendiente de subir" : "Respaldado en el servidor";
+    });
   }
 
   function renderSavedList() {

@@ -118,6 +118,24 @@ function chk(name, got, want) {
   chk("valor conservado", await A.inputValue('input[data-kind="term.flores"]'), "20");
   chk("rama conservada", await A.inputValue('.node.rama input[data-kind="rama.altura"]'), "120.5");
 
+  console.log("== reposo: sin bucle de sincronización ==");
+  // Antes, doSync marcaba pendingIds -> flushSave llamaba a scheduleSync -> otro
+  // doSync, en bucle: ~7 sincronizaciones y 7 reconstrucciones del árbol cada
+  // 10 s estando quieto, con la pantalla saltando bajo los dedos del operario.
+  let syncsEnReposo = 0;
+  await A.route("**/api/sync", (route) => { syncsEnReposo++; route.continue(); });
+  await A.evaluate(() => {
+    window.__renders = 0;
+    new MutationObserver(() => { window.__renders++; })
+      .observe(document.getElementById("tree"), { childList: true });
+  });
+  await A.waitForTimeout(8000);
+  const rendersEnReposo = await A.evaluate(() => window.__renders);
+  chk("no sincroniza en bucle (<=2 en 8s)", syncsEnReposo <= 2, true);
+  chk("no redibuja el árbol en reposo", rendersEnReposo, 0);
+  chk("el botón no queda animado", await A.locator("#syncBtn").evaluate((b) => b.classList.contains("spin")), false);
+  await A.unroute("**/api/sync");
+
   console.log("== modo offline ==");
   await ctxA.setOffline(true);
   await A.waitForTimeout(400);

@@ -251,8 +251,10 @@
 
   .savechip .dot.offline{background:var(--faint)}
   .savechip .dot.pending{background:var(--warn)}
-  #syncBtn.spin svg{animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
+  /* Sincronizando: el icono solo se atenua. Antes giraba, y al sincronizar
+     seguido el movimiento constante distraia y mareaba en pantalla chica. */
+  #syncBtn.spin{opacity:.55}
+  #syncBtn.spin svg{color:var(--rama)}
 
   .acct-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
   .acct-row:last-child{border-bottom:none}
