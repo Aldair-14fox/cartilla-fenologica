@@ -10,7 +10,7 @@ binding = "DB"
 database_name = "cartilla-fenologica"
 # Pega aqui el id que imprime `wrangler d1 create cartilla-fenologica`.
 # El valor de ceros solo sirve para desarrollo local (`wrangler dev --local`).
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "1e07a4b8-1939-4ca0-a9f7-4ea0f5cd86ca"
 
 [observability]
 enabled = true

@@ -24,6 +24,9 @@ chk "sync sin sesión = 401" "$(curl -s -o /dev/null -w '%{http_code}' -X POST $
 
 r=$(curl -s -X POST $B/api/register -H 'content-type: application/json' -d '{"username":"ana","password":"clave12345","nombre":"Ana Quispe","code":"mala"}')
 chk "registro con código malo" "$(echo "$r" | grep -c 'Codigo de registro')" "1"
+chk "registro sin código" "$(curl -s -o /dev/null -w '%{http_code}' -X POST $B/api/register -H 'content-type: application/json' -d '{"username":"colado","password":"clave12345"}')" "403"
+chk "registro con código vacío" "$(curl -s -o /dev/null -w '%{http_code}' -X POST $B/api/register -H 'content-type: application/json' -d '{"username":"colado","password":"clave12345","code":""}')" "403"
+chk "código con espacios no cuela" "$(curl -s -o /dev/null -w '%{http_code}' -X POST $B/api/register -H 'content-type: application/json' -d '{"username":"colado","password":"clave12345","code":"   "}')" "403"
 
 r=$(curl -s -c "$C1" -X POST $B/api/register -H 'content-type: application/json' -d '{"username":"ana","password":"clave12345","nombre":"Ana Quispe","code":"prueba-local"}')
 chk "registro ok" "$(echo "$r" | grep -c '"ok":true')" "1"

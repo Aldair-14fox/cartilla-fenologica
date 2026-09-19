@@ -53,9 +53,18 @@ async function routeApi(request, env, url) {
     if (password.length < 8) {
       return json({ error: "La contrasena debe tener al menos 8 caracteres" }, 400);
     }
-    // Si hay REGISTRATION_CODE configurado, se exige. Sin el, cualquiera podria
-    // crear cuentas en un despliegue publico.
-    if (env.REGISTRATION_CODE && code !== env.REGISTRATION_CODE) {
+    // El registro se cierra con REGISTRATION_CODE. Se exige que el secreto
+    // exista Y tenga contenido: un secreto vacio (se sube solo con pulsar Enter
+    // en el prompt) dejaria el registro abierto a cualquiera con la URL, que es
+    // justo lo contrario de lo que esperaba quien lo configuro.
+    const expectedCode = String(env.REGISTRATION_CODE || "").trim();
+    if (!expectedCode) {
+      return json(
+        { error: "El registro esta cerrado. Falta configurar REGISTRATION_CODE en el servidor." },
+        503
+      );
+    }
+    if (code !== expectedCode) {
       return json({ error: "Codigo de registro incorrecto" }, 403);
     }
 
